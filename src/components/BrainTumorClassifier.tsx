@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Upload, Brain, FileImage, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Client } from "@gradio/client";
 import brainMriSample from '@/assets/brain-mri-sample.jpg';
 
 interface PredictionResult {
@@ -97,56 +98,33 @@ export const BrainTumorClassifier = () => {
         description: "Connecting to AI model for analysis...",
       });
 
-      // Call Gradio API using fetch
-      const formData = new FormData();
-      formData.append('data', JSON.stringify([file]));
-
-      const response = await fetch(`${GRADIO_API_URL}api/predict/`, {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Accept': 'application/json',
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`API request failed: ${response.status}`);
-      }
-
-      const apiResult = await response.json();
-      console.log('API Response:', apiResult);
-
+      // Connect to Gradio client and make prediction
+      const client = await Client.connect(GRADIO_API_URL);
+      
       toast({
         title: "Analyzing...",
         description: "AI model is processing your MRI image",
       });
 
+      const result = await client.predict("/predict", { 
+        image: file, 
+      });
+
+      console.log('API Response:', result.data);
+
       // Parse the prediction results
-      if (apiResult.data && Array.isArray(apiResult.data)) {
-        const predictions = apiResult.data[0]; // Usually the first element contains the predictions
+      // The Gradio API typically returns an array with confidence scores
+      if (result.data && Array.isArray(result.data)) {
+        const predictions = result.data[0]; // Usually the first element contains the predictions
         
         // Map the predictions to our tumor types
-        let mappedPredictions: PredictionResult[];
-        
-        if (Array.isArray(predictions)) {
-          // If predictions is an array of confidence scores
-          mappedPredictions = [
-            { class: 'Glioma Tumor', confidence: (predictions[0] || 0) * 100 },
-            { class: 'Meningioma Tumor', confidence: (predictions[1] || 0) * 100 },
-            { class: 'No Tumor', confidence: (predictions[2] || 0) * 100 },
-            { class: 'Pituitary Tumor', confidence: (predictions[3] || 0) * 100 }
-          ];
-        } else if (typeof predictions === 'object') {
-          // If predictions is an object with named keys
-          mappedPredictions = [
-            { class: 'Glioma Tumor', confidence: (predictions['glioma_tumor'] || predictions['Glioma Tumor'] || 0) * 100 },
-            { class: 'Meningioma Tumor', confidence: (predictions['meningioma_tumor'] || predictions['Meningioma Tumor'] || 0) * 100 },
-            { class: 'No Tumor', confidence: (predictions['no_tumor'] || predictions['No Tumor'] || 0) * 100 },
-            { class: 'Pituitary Tumor', confidence: (predictions['pituitary_tumor'] || predictions['Pituitary Tumor'] || 0) * 100 }
-          ];
-        } else {
-          throw new Error('Unexpected prediction format');
-        }
+        // Adjust this mapping based on your model's actual output format
+        const mappedPredictions: PredictionResult[] = [
+          { class: 'Glioma Tumor', confidence: (predictions['glioma_tumor'] || predictions[0] || 0) * 100 },
+          { class: 'Meningioma Tumor', confidence: (predictions['meningioma_tumor'] || predictions[1] || 0) * 100 },
+          { class: 'No Tumor', confidence: (predictions['no_tumor'] || predictions[2] || 0) * 100 },
+          { class: 'Pituitary Tumor', confidence: (predictions['pituitary_tumor'] || predictions[3] || 0) * 100 }
+        ];
 
         // Sort by confidence
         mappedPredictions.sort((a, b) => b.confidence - a.confidence);
@@ -168,17 +146,17 @@ export const BrainTumorClassifier = () => {
     } catch (error) {
       console.error('Prediction error:', error);
       toast({
-        title: "API Connection Failed",
-        description: "Cannot connect to the AI model. Using demo mode instead.",
-        variant: "default"
+        title: "Analysis Failed",
+        description: "Failed to connect to AI model. Please check your connection and try again.",
+        variant: "destructive"
       });
       
       // Fallback to mock data for demonstration
       const mockPredictions: PredictionResult[] = [
-        { class: 'No Tumor', confidence: 72.4 },
-        { class: 'Glioma Tumor', confidence: 18.6 },
-        { class: 'Pituitary Tumor', confidence: 6.8 },
-        { class: 'Meningioma Tumor', confidence: 2.2 }
+        { class: 'No Tumor', confidence: 65.2 },
+        { class: 'Glioma Tumor', confidence: 23.8 },
+        { class: 'Pituitary Tumor', confidence: 8.1 },
+        { class: 'Meningioma Tumor', confidence: 2.9 }
       ];
 
       setResult({
@@ -188,8 +166,8 @@ export const BrainTumorClassifier = () => {
       });
 
       toast({
-        title: "Demo Results",
-        description: "Showing sample predictions (API unavailable)",
+        title: "Using Demo Mode",
+        description: "Showing sample results due to connection issue",
         variant: "default"
       });
 
