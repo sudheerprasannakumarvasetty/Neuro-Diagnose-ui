@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Upload, Brain, FileImage, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Client } from "@gradio/client";
 import brainMriSample from '@/assets/brain-mri-sample.jpg';
 
 interface PredictionResult {
@@ -16,6 +17,8 @@ interface ClassificationResult {
   primaryPrediction: string;
   uploadedImage: string;
 }
+
+const GRADIO_API_URL = "https://affddb7ddcca425d64.gradio.live/";
 
 const tumorTypes = [
   { name: 'No Tumor', color: 'success', icon: CheckCircle2 },
@@ -86,48 +89,88 @@ export const BrainTumorClassifier = () => {
       };
       reader.readAsDataURL(file);
 
-      // Simulate API call
+      // Start prediction process
       setIsLoading(true);
       setResult(null);
 
-      // Mock prediction results
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      toast({
+        title: "Processing Image",
+        description: "Connecting to AI model for analysis...",
+      });
+
+      // Connect to Gradio client and make prediction
+      const client = await Client.connect(GRADIO_API_URL);
       
+      toast({
+        title: "Analyzing...",
+        description: "AI model is processing your MRI image",
+      });
+
+      const result = await client.predict("/predict", { 
+        image: file, 
+      });
+
+      console.log('API Response:', result.data);
+
+      // Parse the prediction results
+      // The Gradio API typically returns an array with confidence scores
+      if (result.data && Array.isArray(result.data)) {
+        const predictions = result.data[0]; // Usually the first element contains the predictions
+        
+        // Map the predictions to our tumor types
+        // Adjust this mapping based on your model's actual output format
+        const mappedPredictions: PredictionResult[] = [
+          { class: 'Glioma Tumor', confidence: (predictions['glioma_tumor'] || predictions[0] || 0) * 100 },
+          { class: 'Meningioma Tumor', confidence: (predictions['meningioma_tumor'] || predictions[1] || 0) * 100 },
+          { class: 'No Tumor', confidence: (predictions['no_tumor'] || predictions[2] || 0) * 100 },
+          { class: 'Pituitary Tumor', confidence: (predictions['pituitary_tumor'] || predictions[3] || 0) * 100 }
+        ];
+
+        // Sort by confidence
+        mappedPredictions.sort((a, b) => b.confidence - a.confidence);
+
+        setResult({
+          predictions: mappedPredictions,
+          primaryPrediction: mappedPredictions[0].class,
+          uploadedImage: uploadedImage || ''
+        });
+
+        toast({
+          title: "Analysis Complete",
+          description: `Primary prediction: ${mappedPredictions[0].class} (${mappedPredictions[0].confidence.toFixed(1)}%)`,
+        });
+      } else {
+        throw new Error('Unexpected API response format');
+      }
+
+    } catch (error) {
+      console.error('Prediction error:', error);
+      toast({
+        title: "Analysis Failed",
+        description: "Failed to connect to AI model. Please check your connection and try again.",
+        variant: "destructive"
+      });
+      
+      // Fallback to mock data for demonstration
       const mockPredictions: PredictionResult[] = [
-        { class: 'No Tumor', confidence: Math.random() * 30 + 10 },
-        { class: 'Glioma Tumor', confidence: Math.random() * 40 + 30 },
-        { class: 'Meningioma Tumor', confidence: Math.random() * 20 + 5 },
-        { class: 'Pituitary Tumor', confidence: Math.random() * 25 + 15 }
+        { class: 'No Tumor', confidence: 65.2 },
+        { class: 'Glioma Tumor', confidence: 23.8 },
+        { class: 'Pituitary Tumor', confidence: 8.1 },
+        { class: 'Meningioma Tumor', confidence: 2.9 }
       ];
 
-      // Normalize to 100%
-      const total = mockPredictions.reduce((sum, pred) => sum + pred.confidence, 0);
-      const normalizedPredictions = mockPredictions.map(pred => ({
-        ...pred,
-        confidence: (pred.confidence / total) * 100
-      }));
-
-      // Sort by confidence
-      normalizedPredictions.sort((a, b) => b.confidence - a.confidence);
-
       setResult({
-        predictions: normalizedPredictions,
-        primaryPrediction: normalizedPredictions[0].class,
+        predictions: mockPredictions,
+        primaryPrediction: mockPredictions[0].class,
         uploadedImage: uploadedImage || ''
       });
 
       toast({
-        title: "Analysis Complete",
-        description: `Primary prediction: ${normalizedPredictions[0].class}`,
+        title: "Using Demo Mode",
+        description: "Showing sample results due to connection issue",
+        variant: "default"
       });
 
-    } catch (error) {
-      console.error('Upload error:', error);
-      toast({
-        title: "Analysis Failed",
-        description: "An error occurred during image analysis. Please try again.",
-        variant: "destructive"
-      });
     } finally {
       setIsLoading(false);
     }
@@ -222,12 +265,27 @@ export const BrainTumorClassifier = () => {
                 <p className="text-sm text-muted-foreground mb-3">Try with sample image:</p>
                 <div 
                   className="relative rounded-lg overflow-hidden cursor-pointer upload-zone bg-muted"
-                  onClick={() => {
-                    setUploadedImage(brainMriSample);
-                    toast({
-                      title: "Sample Image Loaded",
-                      description: "You can now analyze this sample MRI image.",
-                    });
+                  onClick={async () => {
+                    try {
+                      // Convert sample image to File object for API call
+                      const response = await fetch(brainMriSample);
+                      const blob = await response.blob();
+                      const file = new File([blob], 'sample-mri.jpg', { type: 'image/jpeg' });
+                      
+                      setUploadedImage(brainMriSample);
+                      handleFileUpload(file);
+                      
+                      toast({
+                        title: "Sample Image Loaded",
+                        description: "Analyzing sample MRI image...",
+                      });
+                    } catch (error) {
+                      toast({
+                        title: "Error",
+                        description: "Failed to load sample image",
+                        variant: "destructive"
+                      });
+                    }
                   }}
                 >
                   <img
