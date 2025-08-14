@@ -2,95 +2,110 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Medical AI Interface Design System - Professional Healthcare Colors */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Medical Background Colors */
+    --background: 210 30% 98%;
+    --foreground: 212 15% 15%;
 
+    /* Card & Surface Colors */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 212 15% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 212 15% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Medical Blue Primary Palette */
+    --primary: 208 85% 48%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 208 85% 65%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Soft Medical Secondary */
+    --secondary: 210 20% 96%;
+    --secondary-foreground: 212 15% 25%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Muted Medical Tones */
+    --muted: 210 15% 94%;
+    --muted-foreground: 212 10% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Medical Accent */
+    --accent: 195 85% 55%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Medical Alert Colors */
+    --destructive: 0 75% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 142 85% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 45 95% 55%;
+    --warning-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* Border & Input Styling */
+    --border: 210 20% 88%;
+    --input: 210 20% 88%;
+    --ring: 208 85% 48%;
 
-    --radius: 0.5rem;
+    /* Medical Interface Styling */
+    --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 98%;
+    /* Medical Gradients */
+    --gradient-medical: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+    --gradient-surface: linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted)));
+    --gradient-card: linear-gradient(145deg, hsl(var(--card)), hsl(var(--secondary)));
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    /* Medical Shadows */
+    --shadow-medical: 0 8px 32px -8px hsl(var(--primary) / 0.15);
+    --shadow-card: 0 4px 20px -4px hsl(212 15% 15% / 0.08);
+    --shadow-elevated: 0 12px 40px -8px hsl(212 15% 15% / 0.12);
 
-    --sidebar-primary: 240 5.9% 10%;
+    /* Animation Properties */
+    --transition-medical: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: all 0.2s ease-out;
 
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Medical Typography */
+    --font-medical: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* Dark Medical Theme */
+    --background: 212 25% 8%;
+    --foreground: 210 20% 92%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 212 20% 10%;
+    --card-foreground: 210 20% 92%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 212 20% 10%;
+    --popover-foreground: 210 20% 92%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 208 85% 55%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 208 85% 70%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 212 15% 15%;
+    --secondary-foreground: 210 20% 88%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 212 15% 12%;
+    --muted-foreground: 212 10% 60%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 195 85% 60%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 75% 65%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 142 85% 50%;
+    --success-foreground: 0 0% 100%;
+    --warning: 45 95% 60%;
+    --warning-foreground: 0 0% 100%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 212 15% 18%;
+    --input: 212 15% 18%;
+    --ring: 208 85% 55%;
+
+    --shadow-medical: 0 8px 32px -8px hsl(0 0% 0% / 0.4);
+    --shadow-card: 0 4px 20px -4px hsl(0 0% 0% / 0.3);
+    --shadow-elevated: 0 12px 40px -8px hsl(0 0% 0% / 0.5);
   }
 }
 
@@ -100,6 +115,67 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-medical;
+    background: linear-gradient(135deg, hsl(var(--background)), hsl(var(--muted)));
+    min-height: 100vh;
+  }
+
+  /* Medical Interface Animations */
+  .medical-fade-in {
+    animation: medicalFadeIn 0.6s ease-out;
+  }
+
+  .medical-scale-in {
+    animation: medicalScaleIn 0.4s ease-out;
+  }
+
+  .medical-pulse {
+    animation: medicalPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes medicalFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes medicalScaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes medicalPulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.7;
+    }
+  }
+
+  /* Medical Progress Animations */
+  .confidence-bar {
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Medical Upload Zone */
+  .upload-zone {
+    transition: var(--transition-medical);
+  }
+
+  .upload-zone:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-elevated);
   }
 }
